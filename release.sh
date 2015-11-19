@@ -2,6 +2,11 @@
 
 trap 'cleanup; exit 1' ERR INT
 
+has() {
+    type "$1" >/dev/null 2>&1
+    return $?
+}
+
 die() {
     echo "$@" >&2
     exit 1
@@ -98,6 +103,19 @@ releases_list() {
     done
 }
 
+bg_rotation_bar() {
+    for ((current_count=0; ; current_count++)); do
+        let type=current_count%4
+        case "$type" in
+            0) echo -ne "|\033[1D";;
+            1) echo -ne "/\033[1D";;
+            2) echo -ne "-\033[1D";;
+            3) echo -ne "\\\\\033[1D";;
+        esac
+        sleep 0.01s
+    done
+}
+
 main() {
     # Check L
     [[ $L ]] || die "please specify user/repo as the L variable"
@@ -105,8 +123,12 @@ main() {
 
     local list files
     list=($(
-    curl -sSf -L https://github.com/$L/releases/latest \
-        | egrep -o '/'"$L"'/releases/download/[^"]*'
+    if has "curl"; then
+        curl -sSf -L https://github.com/$L/releases/latest
+    elif has "wget"; then
+        wget -qO - https://github.com/$L/releases/latest
+    fi 2>/dev/null \
+        | grep -o '/'"$L"'/releases/download/[^"]*'
     ))
 
     if (( ${#list} < 1 )); then
@@ -116,16 +138,33 @@ main() {
     clear
     files=($(releases_list "${list[@]}"))
 
-    local f
-    for f in "${files[@]}"
+    local f furl
+    for furl in "${files[@]}"
     do
-        wget "$f"
+        f="${furl##*/}"
+        [[ -e $f ]] && die "$f: already exists"
+
+        if has "curl"; then
+            e_arrow "Downloading $furl"
+            bg_rotation_bar &
+            curl -L -O "$furl" >/dev/null 2>&1
+            kill -13 $!
+        elif has "wget"; then
+            e_arrow "Downloading $furl"
+            bg_rotation_bar &
+            wget "$furl" >/dev/null 2>&1
+            kill -13 $!
+        else
+            die "require: curl or wget"
+        fi
+
+        [[ -f $f ]] || die "failed downloading"
         case "$f" in
             *.zip)
-                unzip "${f##*/}"
+                unzip "$f"
                 ;;
             *.tar.gz|*.tgz)
-                tar xvf "${f##*/}"
+                tar xvf "$f"
                 ;;
         esac
         cleanup
