@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap 'cleanup; exit 1' ERR INT
+trap 'cleanup; exit 1' INT
 
 has() {
     type "$1" >/dev/null 2>&1
@@ -138,8 +138,12 @@ main() {
     fi
 
     # Selection
-    clear
-    files=($(releases_list "${list[@]}"))
+    if [[ $DEBUG ]]; then
+        files=("https://github.com${list[0]}")
+    else
+        clear
+        files=($(releases_list "${list[@]}"))
+    fi
 
     # Grab binaries from github.com
     local f furl
@@ -147,6 +151,7 @@ main() {
     do
         f="${furl##*/}"
         [[ -e $f ]] && die "$f: already exists"
+        [[ -e ${f%%.*} ]] && die "${f%%.*}: already exists"
 
         if has "curl"; then
             e_arrow "Downloading $furl"
@@ -177,4 +182,4 @@ main() {
 }
 
 [ -p /dev/stdin ] && die 'usage: L=user/repo bash -c `curl -L git.io/releases`'
-main
+[[ $DEBUG ]] || main
