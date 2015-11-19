@@ -16,7 +16,7 @@ cleanup() {
     rm -f *.zip *.tar.gz *.tgz
 }
 
-# Logging stuff.
+# Logging stuff
 e_header()   { echo -e "\n\033[1m$@\033[m"; }
 e_arrow()    { echo -e " \033[1;34m=>\033[m  $@"; }
 e_success()  { echo -e " [\033[1;31mx\033[m]  $@"; }
@@ -104,9 +104,11 @@ releases_list() {
 }
 
 bg_rotation_bar() {
-    for ((current_count=0; ; current_count++)); do
-        let type=current_count%4
-        case "$type" in
+    local current_count simbol
+    for ((current_count=0; ; current_count++))
+    do
+        let simbol=current_count%4
+        case "$simbol" in
             0) echo -ne "|\033[1D";;
             1) echo -ne "/\033[1D";;
             2) echo -ne "-\033[1D";;
@@ -121,6 +123,7 @@ main() {
     [[ $L ]] || die "please specify user/repo as the L variable"
     [[ $L =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]] || die "$L: L consists of username/reponame"
 
+    # Get binaries information
     local list files
     list=($(
     if has "curl"; then
@@ -130,14 +133,15 @@ main() {
     fi 2>/dev/null \
         | grep -o '/'"$L"'/releases/download/[^"]*'
     ))
-
     if (( ${#list} < 1 )); then
         die "$L: there are no available releases"
     fi
 
+    # Selection
     clear
     files=($(releases_list "${list[@]}"))
 
+    # Grab binaries from github.com
     local f furl
     for furl in "${files[@]}"
     do
@@ -167,6 +171,7 @@ main() {
                 tar xvf "$f"
                 ;;
         esac
+
         cleanup
     done
 }
