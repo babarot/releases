@@ -109,12 +109,12 @@ bg_rotation_bar() {
     do
         let simbol=current_count%4
         case "$simbol" in
-            0) echo -ne "|\033[1D";;
-            1) echo -ne "/\033[1D";;
-            2) echo -ne "-\033[1D";;
-            3) echo -ne "\\\\\033[1D";;
+            0) echo -ne " |\r";;
+            1) echo -ne " /\r";;
+            2) echo -ne " -\r";;
+            3) echo -ne " \\\\\r";;
         esac
-        sleep 0.01s
+        sleep 0.005s
     done
 }
 
@@ -176,4 +176,5 @@ main() {
     done
 }
 
+[ -p /dev/stdin ] && die 'usage: L=user/repo bash -c `curl -L git.io/releases`'
 main
