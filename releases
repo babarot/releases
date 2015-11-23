@@ -189,6 +189,8 @@ main() {
         fi
 
         [[ -f $f ]] || die "failed downloading"
+        local output
+        output="`
         case "$f" in
             *.zip)
                 unzip "$f"
@@ -196,7 +198,11 @@ main() {
             *.tar.gz|*.tgz)
                 tar xvf "$f"
                 ;;
-        esac >/dev/null 2>&1
+        esac 2>&1
+        `"
+        if [[ $1 == "os" ]]; then
+            mv -f "${output#*x }" "${L#*/}"
+        fi
 
         cleanup
     done
