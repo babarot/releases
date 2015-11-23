@@ -24,8 +24,16 @@ describe "releases"
   end
 
   describe "integration test"
-    it "main"
+    it "L=peco/peco"
       L=peco/peco main >/dev/null
+      assert equal $? $true
+    end
+    it "L=junegunn/fzf-bin"
+      L=junegunn/fzf-bin main >/dev/null
+      assert equal $? $true
+    end
+    it "L=b4b4r07/gotcha"
+      L=b4b4r07/gotcha main >/dev/null
       assert equal $? $true
     end
   end

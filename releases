@@ -175,7 +175,7 @@ main() {
             *.tar.gz|*.tgz)
                 tar xvf "$f"
                 ;;
-        esac
+        esac >/dev/null 2>&1
 
         cleanup
     done
