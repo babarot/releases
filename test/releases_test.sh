@@ -36,5 +36,9 @@ describe "releases"
       L=b4b4r07/gotcha main >/dev/null
       assert equal $? $true
     end
+    it "os detection"
+      L=b4b4r07/gomi main os >/dev/null
+      assert equal $? $true
+    end
   end
 end

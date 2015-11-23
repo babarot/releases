@@ -2,6 +2,16 @@
 
 trap 'cleanup; exit 1' INT
 
+os_detect() {
+    export PLATFORM
+    case "$OSTYPE" in
+        *'linux'*)  PLATFORM='linux'   ;;
+        *'darwin'*) PLATFORM='osx'     ;;
+        *'bsd'*)    PLATFORM='bsd'     ;;
+        *)          PLATFORM='unknown' ;;
+    esac
+}
+
 has() {
     type "$1" >/dev/null 2>&1
     return $?
@@ -140,6 +150,17 @@ main() {
     # Selection
     if [[ $DEBUG ]]; then
         files=("https://github.com${list[0]}")
+    elif [[ $1 == "os" ]]; then
+        os_detect
+        files="`
+        for i in "${list[@]}"; do echo "$i"; done \
+        | case $PLATFORM in
+        osx) grep "darwin" ;;
+        linux) grep "linux" ;;
+        esac | head -n 1
+        `"
+        clear
+        files="https://github.com$files"
     else
         clear
         files=($(releases_list "${list[@]}"))
@@ -182,4 +203,4 @@ main() {
 }
 
 [ -p /dev/stdin ] && die 'usage: L=user/repo bash -c `curl -L git.io/releases`'
-[[ $DEBUG ]] || main
+[[ $DEBUG ]] || main "$@"
