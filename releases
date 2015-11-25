@@ -155,7 +155,7 @@ main() {
         files="`
         for i in "${list[@]}"; do echo "$i"; done \
         | case $PLATFORM in
-        osx) grep "darwin" ;;
+        osx) grep -E "(darwin|osx|mac)" ;;
         linux) grep "linux" ;;
         esac | head -n 1
         `"
@@ -201,7 +201,11 @@ main() {
         esac 2>&1
         `"
         if [[ $1 == "os" ]]; then
-            mv -f "${output#*x }" "${L#*/}"
+            if [[ -e ${output#*x } ]]; then
+                mv -f "${output#*x }" "${L#*/}"
+            else
+                mv -f "$f" "${L#*/}"
+            fi
         fi
 
         cleanup
