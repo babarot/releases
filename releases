@@ -200,15 +200,17 @@ main() {
                 ;;
         esac 2>&1
         `"
+
         if [[ $1 == "os" ]]; then
             local org
             files=(
-            "$(find . -name "*${L#*/}*" -type f)"
-            "$(find -E . -perm 755 -type f -a -regex "./.*(darwin|osx|mac|linux).*")"
+            "${output#x }"
+            "$(find . -name "*${L#*/}" -type f)"
             )
+            (( "${#files[@]}" > 0 )) || die "Error: failed"
             for org in "${files[@]}"
             do
-                command mv -f "$org" "${L#*/}" 2>/dev/null
+                command mv -f "$org" "${L#*/}" 2>/dev/null && break
             done
             chmod 755 "${L#*/}" 2>/dev/null
         fi
