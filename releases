@@ -215,6 +215,7 @@ main() {
             files=(
             "${output#x }"
             "$(find . -name "*${L#*/}" -type f)"
+            "$f"
             )
             (( "${#files[@]}" > 0 )) || die "Error: failed"
             for org in "${files[@]}"
