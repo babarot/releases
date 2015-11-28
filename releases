@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap 'cleanup; exit 1' INT
+trap 'cleanup; kill -9 $! &>/dev/null; exit 1' INT
 
 os_detect() {
     export PLATFORM
@@ -201,11 +201,16 @@ main() {
         esac 2>&1
         `"
         if [[ $1 == "os" ]]; then
-            if [[ -e ${output#*x } ]]; then
-                mv -f "${output#*x }" "${L#*/}"
-            else
-                mv -f "$f" "${L#*/}"
-            fi
+            local org
+            files=(
+            "$(find . -name "*${L#*/}*" -type f)"
+            "$(find -E . -perm 755 -type f -a -regex "./.*(darwin|osx|mac|linux).*")"
+            )
+            for org in "${files[@]}"
+            do
+                command mv -f "$org" "${L#*/}" 2>/dev/null
+            done
+            chmod 755 "${L#*/}" 2>/dev/null
         fi
 
         cleanup
