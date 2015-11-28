@@ -174,8 +174,12 @@ main() {
     for furl in "${files[@]}"
     do
         f="${furl##*/}"
-        [[ -e $f ]] && die "$f: already exists"
-        [[ -e ${f%%.*} ]] && die "${f%%.*}: already exists"
+        if [[ -n $1 ]]; then
+            rm -rf "$f" "${f%%.*}" &>/dev/null
+        else
+            [[ -e $f ]] && die "$f: already exists"
+            [[ -e ${f%%.*} ]] && die "${f%%.*}: already exists"
+        fi
 
         if has "curl"; then
             e_arrow "Downloading $furl"
