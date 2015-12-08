@@ -32,6 +32,44 @@ e_arrow()    { echo -e " \033[1;34m=>\033[m  $@"; }
 e_success()  { echo -e " [\033[1;31mx\033[m]  $@"; }
 e_error()    { echo -e " [\033[1;31m \033[m]  $@"; }
 
+glob2regexp() {
+    local glob char
+
+    glob="$1"
+    if [[ -z $glob ]]; then
+        return 1
+    fi
+
+    printf "^"
+    for ((i=0; i<${#glob}; i++)); do
+        char="${glob:$i:1}"
+        case $char in
+            \*)
+                printf '.*'
+                ;;
+            .)
+                printf '\.'
+                ;;
+            "{")
+                printf '('
+                ;;
+            "}")
+                printf ')'
+                ;;
+            ,)
+                printf '|'
+                ;;
+            \\)
+                printf '\\\\'
+                ;;
+            *)
+                printf "$char"
+                ;;
+        esac
+    done
+    printf "$\n"
+}
+
 # Display a fancy multi-select menu.
 # Inspired by http://serverfault.com/a/298312
 prompt_menu() {
@@ -152,12 +190,12 @@ main() {
         files=("https://github.com${list[0]}")
     elif [[ -n $1 ]]; then
         os_detect
-        local glob
+        local pat
         files="$(
         for i in "${list[@]}"; do echo "$i"; done | \
         if [[ $1 != "os" ]]; then
-            glob="$(sed -e 's/*/.*/g' <<<"$1")"
-            grep -E "$glob"
+            pat="$(glob2regexp $1)"
+            grep -E "$pat"
         elif [[ $PLATFORM == "osx" ]]; then
             grep -E "(darwin|osx|mac)"
         elif [[ $PLATFORM == "linux" ]]; then
