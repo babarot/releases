@@ -170,14 +170,16 @@ main() {
     # Check L
     [[ $L ]] || die "please specify user/repo as the L variable"
     [[ $L =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]] || die "$L: L consists of username/reponame"
+    # Version of release
+    [[ $V ]] && [[ $V != latest ]] && V=tag/$V || V=latest
 
     # Get binaries information
     local list files
     list=($(
     if has "curl"; then
-        curl -sSf -L https://github.com/$L/releases/latest
+        curl -sSf -L https://github.com/$L/releases/$V
     elif has "wget"; then
-        wget -qO - https://github.com/$L/releases/latest
+        wget -qO - https://github.com/$L/releases/$V
     fi 2>/dev/null \
         | grep -o '/'"$L"'/releases/download/[^"]*'
     ))
