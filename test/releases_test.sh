@@ -45,4 +45,17 @@ describe "releases"
       assert equal $? $true
     end
   end
+
+  describe "specifying version"
+    it "downloads version 0.11.0 of junegunn/fzf-bin"
+      L=junegunn/fzf-bin V=0.11.0 main >/dev/null
+      assert file_present 'fzf-0.11.0-*'
+    end
+
+    it "fails when an invalid version is specified"
+      # Use subshell because this dies
+      ( L=junegunn/fzf-bin V=foobar main >/dev/null 2>&1 )
+      assert unequal $? $true
+    end
+  end
 end
