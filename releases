@@ -260,6 +260,7 @@ main() {
             (( "${#files[@]}" > 0 )) || die "Error: failed"
             for org in "${files[@]}"
             do
+                [[ "$org" == "${L#*/}" ]] && break
                 command mv -f "$org" "${L#*/}" 2>/dev/null && break
             done
             chmod 755 "${L#*/}" 2>/dev/null
